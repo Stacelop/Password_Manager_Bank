@@ -6,6 +6,8 @@
 #include "SimpleArduinoEncryption.h"
 #include <SPI.h>
 #include "SD.h"
+#include <bits/stdc++.h>
+#include <string>
 
 #ifndef ARDUINO_USB_MODE
 #error This ESP32 SoC has no Native USB interface
@@ -23,6 +25,7 @@ USBHIDKeyboard Keyboard;
 struct name_password{
   char *Name;
   char *password;
+  char *strength;
 };
 
 typedef struct name_password Struct;
@@ -44,6 +47,7 @@ Bounce2::Button button2 = Bounce2::Button();
 char **en_hex;
 char **Name;
 char **password;
+char **strength
 
 extern int buttonPin1;
 extern int buttonPin2;
@@ -80,9 +84,59 @@ Struct decrypt_display(char *encryptedHex, int row)
   //set 0th column as name, 3th column as password
   Name = (char**)de[0];
   password = (char**)de[3];
+/////
+  int n = password.length();
+    int Strength = 0;
+    string strength = "";
+// Initialize varibles and define special characters
+    bool hasLower = false, hasUpper = false;
+    bool hasNum = false, specialChar = false;
+    string normalChars = "abcdefghijklmnopqrstu"
+        "vwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 ";
 
+// Check what character types are present
+    for (int i = 0; i < n; i++) {
+        if (islower(password[i]))
+            hasLower = true;
+        if (isupper(password[i]))
+            hasUpper = true;
+        if (isdigit(password[i]))
+            hasNum = true;
+        size_t special = password.find_first_not_of(normalChars);
+        if (special != string::npos)
+            specialChar = true;
+    }
+
+// Algorithm to score password strength
+    if((n >= 8) == true) 
+	Strength += 1;
+    if(hasLower == true)
+	Strength += 1;
+    if(hasUpper == true)
+	Strength += 1;
+    if(specialChar == true)
+	Strength += 1;
+    if(hasNum == true)
+	Strength += 1;
+// Print stars #1
+    for (int i = 0; i < Strength; ++i)
+        Serial.print("*");
+// Print stars #2
+    if (Strength == 1) {
+        strength = "*";
+    } else if (Strength == 2) {
+        strength = "**";
+    } else if (Strength == 3) {
+        strength = "***";
+    } else if (Strength == 4) {
+        strength = "****";
+    } else if (Strength == 5) {
+        strength = "*****";
+}    
+/////
   s.Name = Name[row];
   s.password = password[row];
+  s.strength = strength;
   return s;
 }
 
